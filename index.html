@@ -20,9 +20,11 @@
   </head>
   <body>
     <div id="App">
-      <label for="Csp">Content Security Policy</label>
-      <textarea id="Csp" cols="30" rows="10" spellcheck="false"></textarea>
-
+      <form id="Form" novalidate>
+        <label for="Url">Url:</label>
+        <input type="url" id="Url" autocomplete="off" />
+        <button>Go</button>
+      </form>
       <pre id="Output"></pre>
     </div>
 

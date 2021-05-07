@@ -1,6 +1,7 @@
 import { parseCsp } from './parseCsp.js'
 
-const $Csp = document.getElementById('Csp')
+const $Url = document.getElementById('Url')
+const $Form = document.getElementById('Form')
 let $Output = document.getElementById('Output')
 
 const compress = (value) => LZString.compressToBase64(value)
@@ -8,16 +9,14 @@ const compress = (value) => LZString.compressToBase64(value)
 const decompress = (value) => LZString.decompressFromBase64(value)
 
 const updateUrl = () => {
-  const value = $Csp.value
-  const compressed = compress(value)
-
+  const value = $Url.value
   const newUrl =
     window.location.protocol +
     '//' +
     window.location.host +
     window.location.pathname +
-    '?csp=' +
-    compressed
+    '?url=' +
+    encodeURIComponent(value)
   history.replaceState({ path: newUrl }, '', newUrl)
 }
 
@@ -35,8 +34,44 @@ const updateUrlThrottled = () => {
   }, 30)
 }
 
-const handleChange = () => {
-  const csp = $Csp.value
+const handleChange = async (event) => {
+  const $NewOutput = document.createElement('small')
+  $NewOutput.textContent = '(loading)'
+  $Output.replaceWith($NewOutput)
+  $Output = $NewOutput
+  if (event) {
+    event.preventDefault()
+  }
+  const url = $Url.value
+  if (!url) {
+    return
+  }
+  let csp = ''
+  try {
+    const res = await fetch(`https://cors.bridged.cc/${url}`)
+    if (res.status === 404) {
+      const $NewOutput = document.createElement('small')
+      $NewOutput.textContent = '(not found)'
+      $Output.replaceWith($NewOutput)
+      $Output = $NewOutput
+      return
+    }
+    const headers = res.headers
+    csp = headers.get('Content-Security-Policy') || ''
+  } catch (error) {
+    const $NewOutput = document.createElement('small')
+    $NewOutput.textContent = `(error ${error})`
+    $Output.replaceWith($NewOutput)
+    $Output = $NewOutput
+    return
+  }
+  if (!csp) {
+    const $NewOutput = document.createElement('small')
+    $NewOutput.textContent = '(empty csp)'
+    $Output.replaceWith($NewOutput)
+    $Output = $NewOutput
+    return
+  }
   const parsedCsp = parseCsp(csp)
   if (parsedCsp.errors.length > 0) {
     const $NewOutput = document.createElement('pre')
@@ -61,15 +96,18 @@ const handleChange = () => {
     $Output = $Dl
   }
 
-  updateUrlThrottled()
+  // updateUrlThrottled()
 }
 
 if ('URLSearchParams' in window) {
   const searchParams = new URLSearchParams(window.location.search)
-  const csp = searchParams.get('csp')
-  const decompressed = decompress(csp)
-  $Csp.value = decompressed
-  handleChange()
+  const url = searchParams.get('url')
+  if (url) {
+    const decoded = decodeURIComponent(url)
+    $Url.value = decoded
+    handleChange()
+  }
 }
 
-$Csp.oninput = handleChange
+$Form.onsubmit = handleChange
+// $Url.oninput = handleChange
