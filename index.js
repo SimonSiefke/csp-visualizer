@@ -6,6 +6,12 @@ const $Output = document.getElementById('Output')
 const handleChange = () => {
   const csp = $Csp.value
   const parsedCsp = parseCsp(csp)
+  if (parsedCsp.errors) {
+    const $NewOutput = document.createElement('pre')
+    $NewOutput.textContent = JSON.stringify(parsedCsp.errors, null, 1)
+    $Output.replaceWith($NewOutput)
+    return
+  }
 
   let $Dl = document.createElement('dl')
   for (const [key, values] of Object.entries(parsedCsp.result)) {
