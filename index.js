@@ -3,10 +3,42 @@ import { parseCsp } from './parseCsp.js'
 const $Csp = document.getElementById('Csp')
 const $Output = document.getElementById('Output')
 
+const compress = (value) => LZString.compressToBase64(value)
+
+const decompress = (value) => LZString.decompressFromBase64(value)
+
+const updateUrl = () => {
+  const value = $Csp.value
+  const compressed = compress(value)
+
+  const newUrl =
+    window.location.protocol +
+    '//' +
+    window.location.host +
+    window.location.pathname +
+    '?csp=' +
+    compressed
+  history.replaceState({ path: newUrl }, '', newUrl)
+}
+
+let pending = false
+
+const updateUrlThrottled = () => {
+  if (pending) {
+    return
+  }
+  pending = true
+  updateUrl()
+  requestIdleCallback(() => {
+    updateUrl()
+    pending = false
+  })
+}
+
 const handleChange = () => {
   const csp = $Csp.value
   const parsedCsp = parseCsp(csp)
-  if (parsedCsp.errors) {
+  if (parsedCsp.errors.length > 0) {
     const $NewOutput = document.createElement('pre')
     $NewOutput.textContent = JSON.stringify(parsedCsp.errors, null, 1)
     $Output.replaceWith($NewOutput)
@@ -27,6 +59,15 @@ const handleChange = () => {
   }
 
   $Output.replaceWith($Dl)
+
+  updateUrlThrottled()
+}
+
+if ('URLSearchParams' in window) {
+  const searchParams = new URLSearchParams(window.location.search)
+  const csp = searchParams.get('csp')
+  const decompressed = decompress(csp)
+  $Csp.value = decompressed
 }
 
 $Csp.oninput = handleChange
