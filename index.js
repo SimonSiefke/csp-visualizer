@@ -1,7 +1,7 @@
 import { parseCsp } from './parseCsp.js'
 
 const $Csp = document.getElementById('Csp')
-const $Output = document.getElementById('Output')
+let $Output = document.getElementById('Output')
 
 const compress = (value) => LZString.compressToBase64(value)
 
@@ -42,6 +42,7 @@ const handleChange = () => {
     const $NewOutput = document.createElement('pre')
     $NewOutput.textContent = JSON.stringify(parsedCsp.errors, null, 1)
     $Output.replaceWith($NewOutput)
+    $Output = $NewOutput
     return
   }
 
@@ -59,6 +60,7 @@ const handleChange = () => {
   }
 
   $Output.replaceWith($Dl)
+  $Output = $Dl
 
   updateUrlThrottled()
 }
@@ -68,6 +70,7 @@ if ('URLSearchParams' in window) {
   const csp = searchParams.get('csp')
   const decompressed = decompress(csp)
   $Csp.value = decompressed
+  handleChange()
 }
 
 $Csp.oninput = handleChange
