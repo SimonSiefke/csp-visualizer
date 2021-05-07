@@ -43,24 +43,23 @@ const handleChange = () => {
     $NewOutput.textContent = JSON.stringify(parsedCsp.errors, null, 1)
     $Output.replaceWith($NewOutput)
     $Output = $NewOutput
-    return
-  }
-
-  let $Dl = document.createElement('dl')
-  for (const [key, values] of Object.entries(parsedCsp.result)) {
-    const $Dt = document.createElement('dt')
-    $Dt.textContent = key
-    $Dl.append($Dt)
-    const sortedValues = values.slice().sort((a, b) => a.localeCompare(b))
-    for (const value of sortedValues) {
-      const $Dd = document.createElement('dd')
-      $Dd.textContent = value
-      $Dl.append($Dd)
+  } else {
+    let $Dl = document.createElement('dl')
+    for (const [key, values] of Object.entries(parsedCsp.result)) {
+      const $Dt = document.createElement('dt')
+      $Dt.textContent = key
+      $Dl.append($Dt)
+      const sortedValues = values.slice().sort((a, b) => a.localeCompare(b))
+      for (const value of sortedValues) {
+        const $Dd = document.createElement('dd')
+        $Dd.textContent = value
+        $Dl.append($Dd)
+      }
     }
-  }
 
-  $Output.replaceWith($Dl)
-  $Output = $Dl
+    $Output.replaceWith($Dl)
+    $Output = $Dl
+  }
 
   updateUrlThrottled()
 }
