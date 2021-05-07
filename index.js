@@ -29,10 +29,10 @@ const updateUrlThrottled = () => {
   }
   pending = true
   updateUrl()
-  requestIdleCallback(() => {
+  setTimeout(() => {
     updateUrl()
     pending = false
-  })
+  }, 30)
 }
 
 const handleChange = () => {
