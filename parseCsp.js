@@ -15,10 +15,10 @@ const validValues = new Set([
   'report-uri',
 ])
 
-const RE_KEY = /[a-zA-Z\d\-]+/
+const RE_KEY = /^[a-zA-Z\d\-]+/
 const RE_WHITESPACE = /^\s+/
 const RE_VALUE = /^[^\s;]+/
-const RE_COMMA = /^;/
+const RE_SEMICOLON = /^;/
 
 export const parseCsp = (csp) => {
   if (csp.startsWith('Content-Security-Policy:')) {
@@ -32,7 +32,6 @@ export const parseCsp = (csp) => {
   let index = 0
   let key = ''
   outer: while (index < csp.length) {
-    index
     switch (state) {
       case 'top':
         if ((next = csp.slice(index).match(RE_WHITESPACE))) {
@@ -53,18 +52,28 @@ export const parseCsp = (csp) => {
           key = text
           break
         }
+        if ((next = csp.slice(index).match(RE_SEMICOLON))) {
+          const text = next[0]
+          warnings.push({
+            message: 'unnecessary semicolon',
+            index,
+            state,
+            text: csp.slice(index, index + 15),
+          })
+          state = 'top'
+          index += text.length
+          break
+        }
         errors.push({
           message: 'parsing error',
           index,
           state,
-          text: csp.slice(index, index + 10),
+          text: csp.slice(index, index + 15),
         })
+        console.log('break out')
         break outer
       case 'after-key':
-        result
-        csp.slice(index) //?
-        csp.match(RE_WHITESPACE) //?
-        if ((next = csp.slice(index).match(RE_COMMA))) {
+        if ((next = csp.slice(index).match(RE_SEMICOLON))) {
           const text = next[0]
           state = 'top'
           index += text.length
@@ -76,11 +85,14 @@ export const parseCsp = (csp) => {
           index += text.length
           break
         }
+        index
+        console.log('parse error')
+        csp.slice(index) //?
         errors.push({
           message: `parsing error`,
           index,
           state,
-          text: csp.slice(index, index + 10),
+          text: csp.slice(index, index + 15),
         })
         break outer
       case 'after-whitespace':
@@ -95,7 +107,7 @@ export const parseCsp = (csp) => {
           message: `parsing error`,
           index,
           state,
-          text: csp.slice(index, index + 10),
+          text: csp.slice(index, index + 15),
         })
         break outer
       case 'after-value':
@@ -106,7 +118,7 @@ export const parseCsp = (csp) => {
           // result
           break
         }
-        if ((next = csp.slice(index).match(RE_COMMA))) {
+        if ((next = csp.slice(index).match(RE_SEMICOLON))) {
           const text = next[0]
           state = 'top'
           index += text.length
@@ -116,7 +128,7 @@ export const parseCsp = (csp) => {
           message: `parsing error`,
           index,
           state,
-          text: csp.slice(index, index + 10),
+          text: csp.slice(index, index + 15),
         })
         break outer
       default:
@@ -129,5 +141,3 @@ export const parseCsp = (csp) => {
     errors,
   }
 }
-
-// parseCsp(`aaaaa`)//?
