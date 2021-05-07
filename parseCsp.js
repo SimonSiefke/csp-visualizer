@@ -21,6 +21,9 @@ const RE_VALUE = /^[^\s;]+/
 const RE_COMMA = /^;/
 
 export const parseCsp = (csp) => {
+  if (csp.startsWith('Content-Security-Policy:')) {
+    csp = csp.slice('Content-Security-Policy:'.length)
+  }
   let state = 'top'
   let next = null
   const result = Object.create(null)
