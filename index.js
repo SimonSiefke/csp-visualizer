@@ -17,7 +17,7 @@ const updateUrl = () => {
     window.location.pathname +
     '?url=' +
     encodeURIComponent(value)
-  history.replaceState({ path: newUrl }, '', newUrl)
+  history.pushState({ path: newUrl }, '', newUrl)
 }
 
 let pending = false
