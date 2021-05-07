@@ -96,7 +96,7 @@ const handleChange = async (event) => {
     $Output = $Dl
   }
 
-  // updateUrlThrottled()
+  updateUrlThrottled()
 }
 
 if ('URLSearchParams' in window) {
