@@ -42,9 +42,17 @@ const handleChange = async (event) => {
   if (event) {
     event.preventDefault();
   }
-  const url = $Url.value;
+  let url = $Url.value;
   if (!url) {
     return;
+  }
+  if (
+    !url.startsWith("//") &&
+    !url.startsWith("https://") &&
+    !url.startsWith("localhost") &&
+    !url.startsWith("http://")
+  ) {
+    url = "https://" + url;
   }
   let csp = "";
   try {
