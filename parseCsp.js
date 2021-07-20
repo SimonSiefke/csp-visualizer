@@ -103,6 +103,12 @@ export const parseCsp = (csp) => {
           result[key].push(text);
           break;
         }
+        if ((next = csp.slice(index).match(RE_SEMICOLON))) {
+          const text = next[0];
+          state = "top";
+          index += text.length;
+          break;
+        }
         errors.push({
           message: `parsing error`,
           index,
